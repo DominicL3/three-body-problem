@@ -30,12 +30,14 @@ def test_circular_motion_2body():
     pebble = three_body.Body(1, np.array([100, 0, 0]), np.array([0, 1/10, 0]))
 
     # let the clock run a bit
-    for i in np.arange(100):
+    for i in np.arange(10000):
         three_body.update_timestep([sun, pebble], 1)
 
     # ensure radius and velocity is still about the same in circular case
     radius = np.linalg.norm(sun.position - pebble.position)
     mag_velocity = np.linalg.norm(pebble.velocity)
 
-    assert np.allclose(radius, 100), f"Radius has changed from 100 to {radius}"
-    assert np.allclose(mag_velocity, 1/10), f"Velocity has changed from 1/10 to {mag_velocity}"
+    print(f"New pebble position: {pebble.position}")
+
+    assert np.allclose(radius, 100, 0.1), f"Radius has changed from 100 to {radius}"
+    assert np.allclose(mag_velocity, 1/10, 0.1), f"Velocity has changed from 1/10 to {mag_velocity}"

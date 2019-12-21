@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from IPython.display import display, clear_output
 
 # define classes
 class Body:
@@ -45,8 +44,12 @@ if __name__ == "__main__":
     body1 = Body(100, np.array([0, 0, 10]), np.zeros(3))
     body2 = Body(10, np.array([10, 0, 0]), np.zeros(3))
     body3 = Body(10, np.array([0, 10, 0]), np.zeros(3))
-    bodies = [body1, body2, body3]
-    timestep = 3.154e5 # seconds
+
+    sun = Body(1/6.67e-11, np.array([0, 0, 0]), np.array([0, -1/100, 0]))
+    pebble = Body(1, np.array([100, 0, 0]), np.array([0, 1/10, 0]))
+
+    bodies = [sun, pebble]
+    timestep = 50 # seconds
     plt.ion()
     fig = plt.figure(figsize=(8, 6))
     ax = Axes3D(fig)
@@ -56,10 +59,8 @@ if __name__ == "__main__":
         positions = [body.position for body in bodies]
         x, y, z = [p[0] for p in positions], [p[1] for p in positions], [p[2] for p in positions]
 
-        ax.cla()
+        ax.clear()
         ax.scatter(x, y, z)
-        ax.set(xlim=[-500, 500], ylim=[-500, 500], zlim=[-500, 500])
-        display(fig)
-        clear_output(wait = True)
+        ax.set(xlim=[-200, 200], ylim=[-200, 200], zlim=[-200, 200])
         plt.pause(0.05)
 
