@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.animation as animation
 
 class Body:
     """An object defining each celestial body. All Bodies exist in
@@ -38,10 +38,11 @@ class Body:
         return self.position
 
 class Universe:
-    def __init__(self, bodies, size):
+    def __init__(self, bodies, size, dt):
         self.bodies = bodies
         self.size = size
         self.center_of_mass = self.compute_COM(bodies)
+        self.dt = dt
 
     def compute_COM(self, bodies):
         # compute the total mass of all objects
@@ -52,28 +53,32 @@ class Universe:
 
         return mass_x_pos / total_mass
 
-    def update_timestep(self, dt):
+    def update_timestep(self):
         for i, body in enumerate(self.bodies):
             other_bodies = np.delete(bodies, i)
-            body.update_position(other_bodies, dt)
+            body.update_position(other_bodies, self.dt)
 
         # update COM each iteration
         self.center_of_mass = self.compute_COM(self.bodies)
 
-    def plot(self, ax):
-        # get coordinates for all objects
-        positions = [b.position for b in self.bodies]
-        x, y, z = [p[0] for p in positions], [p[1] for p in positions], [p[2] for p in positions]
+    def plot(self, frame):
+        self.update_timestep()
 
         # determine the axes limits from COM and universe size
         plt_low_lim = self.center_of_mass - self.size
         plt_high_lim = self.center_of_mass + self.size
         plt_limits = np.array([plt_low_lim, plt_high_lim]).T
 
+        # get coordinates for all objects
+        positions = [b.position for b in self.bodies]
+
+        # clear axes and plot each object's position
         ax.clear()
-        ax.scatter(x, y, z)
+        for p in positions:
+            x, y, z = p
+            ax.scatter(x, y, z)
         ax.set(xlim=plt_limits[0], ylim=plt_limits[1], zlim=plt_limits[2])
-        plt.pause(0.01)
+        # plt.pause(0.01)
 
 if __name__ == "__main__":
     # define the three bodies and timestep
@@ -82,16 +87,14 @@ if __name__ == "__main__":
     body3 = Body(10, np.array([0, 10, 0]), np.zeros(3))
 
     sun = Body(1/6.67e-11, np.array([0, 0, 0]), np.array([0, -1/100, 0]))
-    pebble = Body(1, np.array([100, 0, 0]), np.array([0, 1/10, 0]))
+    pebble = Body(1, np.array([100, 0, 0]), np.array([0, 0, 1/10]))
 
     bodies = [sun, pebble]
-    timestep = 100 # seconds
-    u = Universe(bodies, 5)
+    u = Universe(bodies, size=100, dt=50)
 
     plt.ion()
     fig = plt.figure(figsize=(8, 6))
-    ax = Axes3D(fig)
+    ax = fig.add_subplot(111, projection='3d')
 
-    while True:
-        u.update_timestep(timestep)
-        u.plot(ax)
+    ani = animation.FuncAnimation(fig, u.plot)
+    plt.show()
